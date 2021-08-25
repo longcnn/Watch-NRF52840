@@ -175,7 +175,8 @@ void SystemTask::Work() {
     if (xQueueReceive(systemTasksMsgQueue, &msg, 100)) {    
       Messages message = static_cast<Messages >(msg); 
       switch(message) {
-        case Messages::GoToRunning:       
+        case Messages::GoToRunning:
+          isRunning = true;        
           //spi.Wakeup();
           twiMaster.Wakeup();
           //touchPanel.Wakeup();
@@ -185,11 +186,12 @@ void SystemTask::Work() {
           nimbleController.StartAdvertising();
           }
           xTimerStart(idleTimer, 0);   
-          spiNorFlash.Wakeup();  
+          //spiNorFlash.Wakeup();  
            
           displayApp.PushMessage(Watch::Applications::DisplayApp::Messages::GoToRunning);
           isSleeping = false;
-          isWakingUp = false;      
+          isWakingUp = false; 
+          isRunning = false;     
           break;
         case Messages::GoToSleep:
           xTimerStop(idleTimer, 0);
@@ -238,23 +240,26 @@ void SystemTask::Work() {
           GoToRunning();
           displayApp.PushMessage(Watch::Applications::DisplayApp::Messages::Clock);
           }
-        } break;
+        } 
+          break;
 
         case Messages::AlwaysDisplay:
          batteryController.setGoToSleep(false);
           xTimerStart(idleTimer, 0);
           break;
         case Messages::OnDisplayTaskSleeping:         
-          spiNorFlash.Sleep();
+          isSleeping = true;
+          isRunning = true; 
+          lcd.DisplayOff();
           lcd.Sleep(); 
           //spi.Sleep();
-          
-          //if(!bleController.IsConnected()) nimbleController.StopAdv();
+          //spiNorFlash.Sleep();
           NRF_POWER->TASKS_LOWPWR = 1;         
-          isSleeping = true;
-          isGoingToSleep = false;
+                  
           //touchPanel.Sleep();
           twiMaster.Sleep();
+          isRunning = false; 
+          isGoingToSleep = false;          
           break;
         case Messages::OnChargingEvent:
         batteryController.setIsVibrate();
@@ -281,7 +286,7 @@ void SystemTask::Work() {
 }
 
 void SystemTask::UpdateMotion() {
-  if (isGoingToSleep or isWakingUp)
+  if (isGoingToSleep or isWakingUp or isRunning)
     return;
 
  //if (isSleeping)
@@ -513,11 +518,11 @@ void SystemTask::CheckCommon(){
     CheckLowbattery();  
 
 	  if(!checkcharging && batteryController.IsCharging()){ 
-      //  if(isSleeping && !isWakingUp) GoToRunning();
-      //   displayApp.PushMessage(Watch::Applications::DisplayApp::Messages::Charging);  
+       if(isSleeping && !isWakingUp) GoToRunning();
+        displayApp.PushMessage(Watch::Applications::DisplayApp::Messages::Charging);  
     } else if(checkcharging && !batteryController.IsCharging() ){   
-      //  if(isSleeping && !isWakingUp) GoToRunning();
-      //   displayApp.PushMessage(Watch::Applications::DisplayApp::Messages::Charging);
+       if(isSleeping && !isWakingUp) GoToRunning();
+        displayApp.PushMessage(Watch::Applications::DisplayApp::Messages::Charging);
     } 
     checkcharging=batteryController.IsCharging();
 }
@@ -558,8 +563,8 @@ void SystemTask::CheckLowbattery(){
     if((batteryController.PercentRemaining()<28)&& !batteryController.IsCharging() && !checklowbattery) { 
         batteryController.setButtonData(0x05);
         xTimerStart(idleTimerSendLowBattery, 0);  
-        // if(isSleeping && !isWakingUp) GoToRunning();
-        // displayApp.PushMessage(Watch::Applications::DisplayApp::Messages::Lowbattery);
+        if(isSleeping && !isWakingUp) GoToRunning();
+        displayApp.PushMessage(Watch::Applications::DisplayApp::Messages::Lowbattery);
         checklowbattery = true;
     } 
     if((batteryController.PercentRemaining()>35) || batteryController.IsCharging()) {

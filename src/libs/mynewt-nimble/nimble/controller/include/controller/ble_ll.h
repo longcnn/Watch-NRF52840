@@ -35,8 +35,13 @@
 extern "C" {
 #endif
 
-#if MYNEWT_VAL(OS_CPUTIME_FREQ) != 32768
-#error 32.768kHz clock required
+// #if MYNEWT_VAL(OS_CPUTIME_FREQ) != 32768
+// #error 32.768kHz clock required
+// #endif
+
+
+#if MYNEWT_VAL(OS_CPUTIME_FREQ) != 1000000
+#error 1000.000kHz clock required
 #endif
 
 #if defined(MYNEWT) && MYNEWT_VAL(BLE_LL_VND_EVENT_ON_ASSERT)
@@ -443,6 +448,14 @@ struct ble_dev_addr
 #define BLE_LL_ADDR_SUBTYPE_IDENTITY    (0)
 #define BLE_LL_ADDR_SUBTYPE_RPA         (1)
 #define BLE_LL_ADDR_SUBTYPE_NRPA        (2)
+
+/* ACAD data types */
+#define BLE_LL_ACAD_CHANNEL_MAP_UPDATE_IND 0x28
+
+struct ble_ll_acad_channel_map_update_ind {
+    uint8_t map[5];
+    uint16_t instant;
+} __attribute__((packed));
 
 /*--- External API ---*/
 /* Initialize the Link Layer */

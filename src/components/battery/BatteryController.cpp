@@ -213,6 +213,6 @@ void Battery::setXmax(float x){xmax=x;};
 void Battery::setYmax(float y){ymax=y;};
 void Battery::setZmax(float z){zmax=z;};
 
-void Battery::validatorFirmware(){validator = true;}
+void Battery::validatorFirmware(bool data){validator = data;}
 
 

@@ -114,7 +114,7 @@ void DisplayApp::Refresh() {
       case Messages::GoToSleep:     
         //SetTouchMode(DisplayApp::TouchModes::Gestures); 
         //PushMessage(Messages::Clock);    
-        lcd.DisplayOff(); 
+        //lcd.DisplayOff(); 
         PushMessageToSystemTask(Watch::System::Messages::OnDisplayTaskSleeping);
         state = States::Idle;
         break;
@@ -128,8 +128,6 @@ void DisplayApp::Refresh() {
         checkImpact =false;
         checkCheckin =false;
         batteryController.setIsVibrate();
-        //if(batteryController.IsvalidatorFirmware()) validator.Validate(); 
-        validator.Validate();     
         if(bleController.IsConnected()) { SwitchApp(1);   appIndex =1; }          
         else SwitchApp(7);           
         break;
@@ -189,7 +187,6 @@ void DisplayApp::Refresh() {
           checkCheckin =false;
           batteryController.setDisturnOff(false);             
           appIndex=0; 
-          //PushMessage(Messages::Clock);
           PushMessageToSystemTask(Watch::System::Messages::GoToSleep);
           break;
 
@@ -231,6 +228,11 @@ void DisplayApp::Refresh() {
           break;
 
       case Messages::Clock: 
+          if(batteryController.IsvalidatorFirmware()) {
+            validator.Validate(); 
+            batteryController.validatorFirmware(false);
+          }
+
           batteryController.setDisturnOff(false);
           if(batteryController.IsCharging()) SwitchApp(8);
           else if(bleController.IsConnected()) SwitchApp(0); 

@@ -14,6 +14,7 @@ bool SpiMaster::Init() {
     mutex = xSemaphoreCreateBinary();
     ASSERT(mutex != nullptr);
   }
+
   /* Configure GPIO pins used for pselsck, pselmosi, pselmiso and pselss for SPI0 */
   nrf_gpio_pin_set(params.pinSCK);
   nrf_gpio_cfg_output(params.pinSCK);
@@ -30,9 +31,6 @@ bool SpiMaster::Init() {
     case SpiModule::SPI1:
       spiBaseAddress = NRF_SPIM1;
       break;
-    case SpiModule::SPI3:
-      spiBaseAddress = NRF_SPIM3;
-    break;
     default:
       return false;
   }
@@ -46,9 +44,6 @@ bool SpiMaster::Init() {
   switch (params.Frequency) {
     case Frequencies::Freq8Mhz:
       frequency = 0x80000000;
-      break;
-  case Frequencies::Freq16Mhz:
-      frequency = 0x0A000000;
       break;
     default:
       return false;
@@ -92,18 +87,23 @@ bool SpiMaster::Init() {
 
   spiBaseAddress->ENABLE = (SPIM_ENABLE_ENABLE_Enabled << SPIM_ENABLE_ENABLE_Pos);
 
-  switch (spi) {
+
+    switch (spi) {
     case SpiModule::SPI0:
-    NRFX_IRQ_PRIORITY_SET(SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQn, 2);
-    NRFX_IRQ_ENABLE(SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQn);
+        NRFX_IRQ_PRIORITY_SET(SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQn, 2);
+        NRFX_IRQ_ENABLE(SPIM0_SPIS0_TWIM0_TWIS0_SPI0_TWI0_IRQn);
+
       break;
-    case SpiModule::SPI3:
-    NRFX_IRQ_PRIORITY_SET(SPIM3_IRQn, 2);
-    NRFX_IRQ_ENABLE(SPIM3_IRQn);
-    break;
-     default:
-   return false;
+    case SpiModule::SPI1:
+        NRFX_IRQ_PRIORITY_SET(SPIM1_SPIS1_TWIM1_TWIS1_SPI1_TWI1_IRQn, 2);
+        NRFX_IRQ_ENABLE(SPIM1_SPIS1_TWIM1_TWIS1_SPI1_TWI1_IRQn);
+
+      break;
+    default:
+      return false;
   }
+
+
   xSemaphoreGive(mutex);
   return true;
 }
@@ -150,17 +150,17 @@ void SpiMaster::OnEndEvent() {
 
     spiBaseAddress->TASKS_START = 1;
   } else {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     if (taskToNotify != nullptr) {
-      BaseType_t xHigherPriorityTaskWoken = pdFALSE;
       vTaskNotifyGiveFromISR(taskToNotify, &xHigherPriorityTaskWoken);
       portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
 
     nrf_gpio_pin_set(this->pinCsn);
     currentBufferAddr = 0;
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    xSemaphoreGiveFromISR(mutex, &xHigherPriorityTaskWoken);
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    BaseType_t xHigherPriorityTaskWoken2 = pdFALSE;
+    xSemaphoreGiveFromISR(mutex, &xHigherPriorityTaskWoken2);
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken | xHigherPriorityTaskWoken2);
   }
 }
 

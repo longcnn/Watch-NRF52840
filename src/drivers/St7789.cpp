@@ -24,17 +24,7 @@ void St7789::Init() {
   ColumnAddressSet();
   RowAddressSet();
   DisplayInversionOn();
-  NormalModeOn();  
-  //PorchSetting();
-  //GateControl();
-  //VCOMSetting();
-  //VDVandVRHCommandEnable();
-  //VRHSet();
-  //VDVSet();
-  //FrameRateControlinNormalMode();
-  //PowerControl1();
-  //PositiveVoltageGammaControl();
-  //NegativeVoltageGammaControl();
+  NormalModeOn();
   DisplayOn();
 }
 
@@ -71,93 +61,9 @@ void St7789::ColMod() {
   nrf_delay_ms(10);
 }
 
- void St7789::PorchSetting(){
-  WriteCommand(static_cast<uint8_t>(Commands::PorchSetting));
-  WriteData(0x0C);   
-  WriteData(0x0C);   
-  WriteData(0x00);   
-  WriteData(0x33);   
-  WriteData(0x33);  
- }
-
-void St7789::GateControl(){
-  WriteCommand(static_cast<uint8_t>(Commands::GateControl));
-  WriteData(0x35);  
-}
-
-void St7789::LCMControl(){
-  WriteCommand(static_cast<uint8_t>(Commands::LCMControl));
-  WriteData(0x2C);
-}
-
-void St7789::VCOMSetting(){
-  WriteCommand(static_cast<uint8_t>(Commands::VCOMSetting));
-  WriteData(0x1e);
-}
-void St7789::VDVandVRHCommandEnable(){
-  WriteCommand(static_cast<uint8_t>(Commands::VDVandVRHCommandEnable));
-  WriteData(0x01);   
-}
-
-void St7789::VRHSet(){
-  WriteCommand(static_cast<uint8_t>(Commands::VRHSet));
-  WriteData(0x0B); 
-}
-
-void St7789::VDVSet(){
-  WriteCommand(static_cast<uint8_t>(Commands::VDVSet));
-  WriteData(0x20); 
-}
-
-void St7789::FrameRateControlinNormalMode(){
-  WriteCommand(static_cast<uint8_t>(Commands::FrameRateControlinNormalMode));
-  WriteData(0x0F);
-}
-
-void St7789::PowerControl1(){
-  WriteCommand(static_cast<uint8_t>(Commands::PowerControl1));
-  WriteData(0xA4);   
-  WriteData(0xA1); 
-}
-
-void St7789::PositiveVoltageGammaControl(){
-  WriteCommand(static_cast<uint8_t>(Commands::PositiveVoltageGammaControl));
-  WriteData(0xD0);   
-  WriteData(0x0A);   
-  WriteData(0x0F);   
-  WriteData(0x0A);   
-  WriteData(0x0A);   
-  WriteData(0x26);   
-  WriteData(0x35);   
-  WriteData(0x3F);   
-  WriteData(0x4D);   
-  WriteData(0x29);   
-  WriteData(0x14);   
-  WriteData(0x14);   
-  WriteData(0x2E);   
-  WriteData(0x32);   
-}
-
-void St7789::NegativeVoltageGammaControl(){
-  WriteCommand(static_cast<uint8_t>(Commands::NegativeVoltageGammaControl));
-  WriteData(0xD0);   
-  WriteData(0x0A);   
-  WriteData(0x10);   
-  WriteData(0x0B);   
-  WriteData(0x09);   
-  WriteData(0x25);   
-  WriteData(0x36);   
-  WriteData(0x40);   
-  WriteData(0x4C);   
-  WriteData(0x28);   
-  WriteData(0x14);   
-  WriteData(0x14);   
-  WriteData(0x2D);   
-  WriteData(0x32);   
-}
-
 void St7789::MemoryDataAccessControl() {
   WriteCommand(static_cast<uint8_t>(Commands::MemoryDataAccessControl));
+  //WriteData(0x00);
   WriteData(0xc0);
 }
 
@@ -189,7 +95,6 @@ void St7789::NormalModeOn() {
 
 void St7789::DisplayOn() {
   WriteCommand(static_cast<uint8_t>(Commands::DisplayOn));
-  nrf_delay_ms(10);
 }
 
 void St7789::SetAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
@@ -215,7 +120,7 @@ void St7789::WriteToRam() {
 void St7789::DisplayOff() {
   nrf_gpio_pin_clear(2);
   WriteCommand(static_cast<uint8_t>(Commands::DisplayOff));
-  nrf_delay_ms(200);
+  nrf_delay_ms(100);
 }
 
 void St7789::VerticalScrollDefinition(uint16_t topFixedLines, uint16_t scrollLines, uint16_t bottomFixedLines) {
@@ -239,7 +144,9 @@ void St7789::Uninit() {
 }
 
 void St7789::DrawPixel(uint16_t x, uint16_t y, uint32_t color) {
- if (x >= Width || y >= Height) return;
+  if (x >= Width || y >= Height) {
+    return;
+  }
 
   SetAddrWindow(x, y, x + 1, y + 1);
 
@@ -248,11 +155,7 @@ void St7789::DrawPixel(uint16_t x, uint16_t y, uint32_t color) {
 }
 
 void St7789::DrawBuffer(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const uint8_t* data, size_t size) {
- // if((x >= Width) || (y >= Height)) return;
- // if((x + width - 1) >= Width)  width = Width  - x;
- // if((y + height - 1) >= Height) height = Height - y;
   y +=80;  
-  
   SetAddrWindow(x, y, x + width - 1, y + height - 1);
   nrf_gpio_pin_set(pinDataCommand);
   WriteSpi(data, size);
@@ -267,6 +170,7 @@ void St7789::HardwareReset() {
 void St7789::Sleep() {
   SleepIn();
   nrf_gpio_cfg_default(pinDataCommand);
+  NRF_LOG_INFO("[LCD] Sleep");
 }
 
 void St7789::Wakeup() {
@@ -281,17 +185,8 @@ void St7789::Wakeup() {
   RowAddressSet();
   DisplayInversionOn();
   NormalModeOn();
-//PorchSetting();
- // GateControl();
- // VCOMSetting();
-  //VDVandVRHCommandEnable();
-  //VRHSet();
- // VDVSet();
-  //FrameRateControlinNormalMode();
-  PowerControl1();
-  //PositiveVoltageGammaControl();
-  //NegativeVoltageGammaControl();
   VerticalScrollStartAddress(verticalScrollingStartAddress);
   DisplayOn();
+  NRF_LOG_INFO("[LCD] Wakeup")
   nrf_gpio_pin_set(2);
 }

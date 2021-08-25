@@ -58,7 +58,7 @@ static constexpr uint8_t pinSpiAccCsn = 8;
 
 Watch::Drivers::SpiMaster spi {Watch::Drivers::SpiMaster::SpiModule::SPI0,
                                   {Watch::Drivers::SpiMaster::BitOrder::Msb_Lsb,
-                                   Watch::Drivers::SpiMaster::Modes::Mode3,
+                                   Watch::Drivers::SpiMaster::Modes::Mode0,
                                    Watch::Drivers::SpiMaster::Frequencies::Freq8Mhz,
                                    pinSpiSck,
                                    pinSpiMosi,
@@ -252,7 +252,6 @@ void BleHost(void*) {
   nimble_port_run();
 }
 
-
 void nimble_port_init(void) {
   void os_msys_init(void);
   void ble_store_ram_init(void);
@@ -275,7 +274,6 @@ void nimble_port_ll_task_func(void* args) {
   extern void ble_ll_task(void*);
   ble_ll_task(args);
   }
-}
 
 void configure_ram_retention(void)
 {
@@ -292,6 +290,7 @@ void configure_ram_retention(void)
     NRF_RADIO->TASKS_TXEN = 1;
     NRF_RADIO->TASKS_RXEN = 1;
     NRF_RADIO->TASKS_START = 1;
+ }
 }
 
 int main(void) { 

@@ -42,17 +42,6 @@ namespace Watch {
       void DisplayInversionOn();
       void NormalModeOn();
       void WriteToRam();
-      void PorchSetting();
-      void GateControl();
-      void VCOMSetting();
-      void LCMControl();
-      void VRHSet();
-      void VDVSet();
-      void VDVandVRHCommandEnable();
-      void FrameRateControlinNormalMode();
-      void PowerControl1();
-      void PositiveVoltageGammaControl();
-      void NegativeVoltageGammaControl();
       void SetAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
       void WriteCommand(uint8_t cmd);
       void WriteSpi(const uint8_t* data, size_t size);
@@ -72,17 +61,6 @@ namespace Watch {
         VerticalScrollDefinition = 0x33,
         VerticalScrollStartAddress = 0x37,
         ColMod = 0x3a,
-        PorchSetting = 0xb2,
-        GateControl = 0xb7,
-        VCOMSetting = 0xbb,
-        LCMControl = 0xc0,
-        VDVandVRHCommandEnable = 0xc2,
-        VRHSet = 0xc3,
-        VDVSet = 0xc4,
-        FrameRateControlinNormalMode = 0xc6,
-        PowerControl1 = 0xd0,
-        PositiveVoltageGammaControl = 0xe0,
-        NegativeVoltageGammaControl = 0xe1,
       };
       void WriteData(uint8_t data);
       void ColumnAddressSet();

@@ -84,6 +84,7 @@ namespace Watch {
           std::atomic<bool> isSleeping{false};
           std::atomic<bool> isGoingToSleep{false};
           std::atomic<bool> isWakingUp{false};
+          std::atomic<bool> isRunning {false};
           Watch::Drivers::Watchdog watchdog;
           Watch::Drivers::WatchdogView watchdogView;
           Watch::Controllers::NotificationManager& notificationManager;

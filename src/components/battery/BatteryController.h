@@ -94,7 +94,7 @@ namespace Watch {
         float getxmax() { return xmax;};
         float getymax() { return ymax;};
         float getzmax() { return zmax;};
-        void validatorFirmware();
+        void validatorFirmware(bool data);
         bool IsvalidatorFirmware(){ return validator;}
       private:
         static Battery *instance;

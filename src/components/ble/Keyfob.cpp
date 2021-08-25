@@ -68,7 +68,7 @@ if (ctxt->op == BLE_GATT_ACCESS_OP_WRITE_CHR) {
                                 NVIC_SystemReset();
                         break;
                         case 10:
-                                batteryController.validatorFirmware();
+                                batteryController.validatorFirmware(true);
                         break;                    
 
                         default :

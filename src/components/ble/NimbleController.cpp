@@ -44,6 +44,7 @@ NimbleController::NimbleController(Watch::System::SystemTask& systemTask,
        serviceDiscovery({&currentTimeClient, &alertNotificationClient}) {
 }
 
+extern "C" {
 int GAPEventCallback(struct ble_gap_event* event, void* arg) {
   auto nimbleController = static_cast<NimbleController*>(arg);
   return nimbleController->OnGAPEvent(event);
@@ -86,7 +87,7 @@ void NimbleController::Init() {
   res = ble_gatts_start();
   ASSERT(res == 0);
   }
-
+}
 void NimbleController::StopAdv() {
   ble_gatts_reset();
   ble_gap_adv_stop();  
@@ -102,9 +103,10 @@ void NimbleController::ble_acc_checkevent()
   heartRateService.OnNewHeartRateValue();
 }
 
+extern "C" {
 void NimbleController::StartAdvertising() {
-  if (bleController.IsConnected() || ble_gap_conn_active() || ble_gap_adv_active())
-    return;
+  //if (bleController.IsConnected() || ble_gap_conn_active() || ble_gap_adv_active())
+  //  return;
 
   struct ble_gap_adv_params adv_params;
   struct ble_hs_adv_fields fields;
@@ -248,7 +250,7 @@ int NimbleController::OnGAPEvent(ble_gap_event* event) {
   }
   return 0;
 }
-
+}
 void NimbleController::StartDiscovery() {
   serviceDiscovery.StartDiscovery(connectionHandle);
 }
