@@ -53,6 +53,11 @@ void IdleTimerSendLowBattery(TimerHandle_t xTimer) {
   sysTask->CheckSendLowBattery();
 }
 
+void IdleTimerResetCallback(TimerHandle_t xTimer) {
+  auto sysTask = static_cast<SystemTask *>(pvTimerGetTimerID(xTimer));
+  sysTask->ResetWatch();
+}
+
 SystemTask::SystemTask(Drivers::SpiMaster &spi, 
                        Drivers::St7789 &lcd,
                        Watch::Drivers::SpiNorFlash& spiNorFlash,
@@ -106,7 +111,7 @@ void SystemTask::Work() {
   spiNorFlash.Init();
   spiNorFlash.Wakeup();
   nimbleController.Init();
-  nimbleController.StartAdvertising();
+  // nimbleController.StartAdvertising();
   lcd.Init();
 
   twiMaster.Init();
@@ -158,14 +163,16 @@ void SystemTask::Work() {
      
   idleTimer = xTimerCreate ("idleTimer", pdMS_TO_TICKS(25000), pdFALSE, this, IdleTimerCallback);
   idleTimerAcc = xTimerCreate ("idleTimerAcc", pdMS_TO_TICKS(50), pdTRUE, this, IdleTimerAccCallback);
-  idleTimerCommon = xTimerCreate ("idleTimerCommon", pdMS_TO_TICKS(400), pdTRUE, this, IdleTimerCommonCallback);
+  idleTimerCommon = xTimerCreate ("idleTimerCommon", pdMS_TO_TICKS(120), pdTRUE, this, IdleTimerCommonCallback);
   idleTimerTracking = xTimerCreate ("idleTimerAcc", pdMS_TO_TICKS(60000), pdTRUE, this, IdleTimerTrackingCallback);
   idleTimerHeartbeat = xTimerCreate ("idleTimerHeartbeat", pdMS_TO_TICKS(60000), pdTRUE, this, IdleTimerHeartbeatCallback);
   idleTimerSendLowBattery = xTimerCreate ("idleTimerSendLowBattery", pdMS_TO_TICKS(3600000), pdTRUE, this, IdleTimerSendLowBattery);
+  idleTimerReset = xTimerCreate ("idleTimerReset", pdMS_TO_TICKS(3600000), pdTRUE, this, IdleTimerResetCallback);
+
   xTimerStart(idleTimer, 0);
   xTimerStart(idleTimerAcc, 0);
   xTimerStart(idleTimerCommon, 0);  
-  
+
   // Suppress endless loop diagnostic
   #pragma clang diagnostic push
   #pragma ide diagnostic ignored "EndlessLoop"
@@ -181,10 +188,10 @@ void SystemTask::Work() {
           twiMaster.Wakeup();
           //touchPanel.Wakeup();
           lcd.Wakeup(); 
-          if(!bleController.IsConnected()){
+          //if(!bleController.IsConnected()){
           //nimbleController.ReInit();
-          nimbleController.StartAdvertising();
-          }
+         // nimbleController.StartAdvertising();
+         // }
           xTimerStart(idleTimer, 0);   
           //spiNorFlash.Wakeup();  
            
@@ -380,6 +387,7 @@ void SystemTask::CheckFallImpact(){
 if(bleController.IsConnected()) {
    UpdateMotion(); 
    batteryController.setAccData(motionController.ACC());
+   batteryController.setxyz(motionController.X(),motionController.Y(),motionController.Z());
   if(batteryController.getfallyy()!=0x02) { 
       //Ax < 0.3g, Ay < 0.3g and Az < 0.3g for a time t > 300ms (referred to as Freefall later on)
         if((std::fabs(motionController.X())<0.6f) && (std::fabs(motionController.Y())<0.6f) && (std::fabs(motionController.Z())<0.6f)){
@@ -500,8 +508,8 @@ void SystemTask::CheckACC() {
 
 void SystemTask::CheckCommon(){
   
-    //nimbleController.ble_checkevent();
-    nimbleController.ble_acc_checkevent();
+    nimbleController.ble_checkevent();
+    //nimbleController.ble_acc_checkevent();
     CheckCheckIn();
     if(batteryController.Isheartbeat()&& checkheartbeat) { xTimerStart(idleTimerHeartbeat, 0); checkheartbeat = false;}
     if(batteryController.getGoToSleep())  doNotGoToSleep = false;  else doNotGoToSleep = true; 
@@ -517,14 +525,14 @@ void SystemTask::CheckCommon(){
 
     CheckLowbattery();  
 
-	  if(!checkcharging && batteryController.IsCharging()){ 
-       if(isSleeping && !isWakingUp) GoToRunning();
-        displayApp.PushMessage(Watch::Applications::DisplayApp::Messages::Charging);  
-    } else if(checkcharging && !batteryController.IsCharging() ){   
-       if(isSleeping && !isWakingUp) GoToRunning();
-        displayApp.PushMessage(Watch::Applications::DisplayApp::Messages::Charging);
-    } 
-    checkcharging=batteryController.IsCharging();
+	  // if(!checkcharging && batteryController.IsCharging()){ 
+    //    if(isSleeping && !isWakingUp) GoToRunning();
+    //     displayApp.PushMessage(Watch::Applications::DisplayApp::Messages::Charging);  
+    // } else if(checkcharging && !batteryController.IsCharging() ){   
+    //    if(isSleeping && !isWakingUp) GoToRunning();
+    //     displayApp.PushMessage(Watch::Applications::DisplayApp::Messages::Charging);
+    // } 
+    // checkcharging=batteryController.IsCharging();
 }
 
 void SystemTask::CheckSendLowBattery(){   
@@ -561,11 +569,11 @@ void SystemTask::CheckHeartbeat(){
 
 void SystemTask::CheckLowbattery(){
     if((batteryController.PercentRemaining()<28)&& !batteryController.IsCharging() && !checklowbattery) { 
-        batteryController.setButtonData(0x05);
-        xTimerStart(idleTimerSendLowBattery, 0);  
-        if(isSleeping && !isWakingUp) GoToRunning();
-        displayApp.PushMessage(Watch::Applications::DisplayApp::Messages::Lowbattery);
-        checklowbattery = true;
+        // batteryController.setButtonData(0x05);
+        // xTimerStart(idleTimerSendLowBattery, 0);  
+        // if(isSleeping && !isWakingUp) GoToRunning();
+        // displayApp.PushMessage(Watch::Applications::DisplayApp::Messages::Lowbattery);
+        //checklowbattery = true;
     } 
     if((batteryController.PercentRemaining()>35) || batteryController.IsCharging()) {
        checklowbattery = false;
@@ -595,4 +603,10 @@ void SystemTask::CheckCheckIn(){
 
 void SystemTask::UpdateTimeOut(uint32_t timeout){
     xTimerChangePeriod(idleTimer, pdMS_TO_TICKS(timeout), 0);
+}
+
+void SystemTask::ResetWatch(){
+  timerReset++;
+
+  if(timerReset>20) NVIC_SystemReset();
 }

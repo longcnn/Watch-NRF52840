@@ -73,18 +73,13 @@ ble_npl_eventq_inited(const struct ble_npl_eventq *evq)
 void
 ble_npl_eventq_put(struct ble_npl_eventq *evq, struct ble_npl_event *ev)
 {
-    int ret;
-
     if (ev->ev_queued)
       {
         return;
       }
 
     ev->ev_queued = 1;
-    ret = mq_send(evq->mq, (const char*)&ev, sizeof(ev), 0);
-
-    DEBUGASSERT(ret == 0);
-    UNUSED(ret);
+    mq_send(evq->mq, (const char*)&ev, sizeof(ev), 0);
 }
 
 struct ble_npl_event *

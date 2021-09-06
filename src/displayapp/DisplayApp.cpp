@@ -128,6 +128,7 @@ void DisplayApp::Refresh() {
         checkImpact =false;
         checkCheckin =false;
         batteryController.setIsVibrate();
+        //validator.Validate(); 
         if(bleController.IsConnected()) { SwitchApp(1);   appIndex =1; }          
         else SwitchApp(7);           
         break;
@@ -261,7 +262,7 @@ void DisplayApp::TouchPolling(){
     auto info = touchPanel.GetTouchInfo();
     if (info.action == 2) { // 2 = contact
       if (!currentScreen->OnTouchEvent(info.x, info.y)) {
-        lvgl.SetNewTapEvent(info.x, info.y);
+        //lvgl.SetNewTapEvent(info.x, info.y);
       }
     } 
   } else  {if(!currentScreen->OnTouchEvent(0, 0)) {}}

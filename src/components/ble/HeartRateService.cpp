@@ -58,7 +58,25 @@ int HeartRateService::OnHeartRateRequested(uint16_t connectionHandle, uint16_t a
   if(attributeHandle == heartRateMeasurementHandle) {
    // NRF_LOG_INFO("BATTERY : handle = %d", heartRateMeasurementHandle);
     //static uint8_t batteryValue = heartRateController.HeartRate();
-    i= uint8_t(batteryController.getAccData()*10);
+    switch (batteryController.getmode())
+    {
+    case 0:
+            i= uint8_t(batteryController.getAccData()*10);
+            break;
+    case 1:
+            i= uint8_t(batteryController.getx()*10+100);
+            break;
+    case 2:
+            i= uint8_t(batteryController.gety()*10+100);
+            break;
+    case 3:
+            i= uint8_t(batteryController.getz()*10+100);
+            break;
+    default:
+            break;
+    }
+    
+      
     uint8_t buffer[2] = {0, i}; // [0] = flags, [1] = hr value
     int res = os_mbuf_append(context->om, buffer, 2);
     return (res == 0) ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;

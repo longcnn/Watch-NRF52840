@@ -9,6 +9,7 @@ set(DCMAKE_BUILD_TYPE Release)
 set(NRFJPROG /opt/nrfjprog)
 
 set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD 14)
 
 # set(CMAKE_GENERATOR "Unix Makefiles")

@@ -214,5 +214,7 @@ void Battery::setYmax(float y){ymax=y;};
 void Battery::setZmax(float z){zmax=z;};
 
 void Battery::validatorFirmware(bool data){validator = data;}
+void Battery::setmode(uint8_t data){mode= data;}
+
 
 

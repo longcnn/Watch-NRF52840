@@ -3,6 +3,9 @@
 #include <libraries/delay/nrf_delay.h>
 #include <nrfx_log.h>
 #include "Spi.h"
+//#include "nrf_drv_pwm.h"
+
+//#include "SEGGER_RTT.h" 
 
 using namespace Watch::Drivers;
 
@@ -26,6 +29,8 @@ void St7789::Init() {
   DisplayInversionOn();
   NormalModeOn();
   DisplayOn();
+  
+  //ControlScreenBrightness();
 }
 
 void St7789::WriteCommand(uint8_t cmd) {
@@ -37,6 +42,49 @@ void St7789::WriteData(uint8_t data) {
   nrf_gpio_pin_set(pinDataCommand);
   WriteSpi(&data, 1);
 }
+
+// void St7789::ControlScreenBrightness(){
+// //  WriteCommand(static_cast<uint8_t>(Commands::WRITE_BRIGHTNESS));
+// //  WriteData(0x52);
+// //  // SEGGER_RTT_printf(0, "arrAccTime[idmaxPeak+i]");
+//  //nrf_gpio_pin_set(PIN_NUM_BCKL);
+
+// }
+
+// Low priority interrupt procedure
+// void interrupt_low_priority_lpHandler(void)
+// {
+// 	// Is this timer0 interrupting?
+// 	if (TMR0IF)
+// 	{
+// 		// Perform the PWM brightness control
+// 		if (ledActualBrightness > pwmCounter)
+// 			LED0 = 1; else LED0 = 0;
+
+// 		pwmCounter++;
+// 		if (pwmCounter > 19) pwmCounter = 0;
+		
+// 		// Perform fading control
+// 		if (ledTargetBrightness >= ledActualBrightness)
+// 			ledActualBrightness = ledTargetBrightness;
+// 		else
+// 		{
+// 			fadeCounter++;
+// 			if (fadeCounter == 24)
+// 			{
+// 				ledActualBrightness--;
+// 				fadeCounter = 0;
+// 			}	
+// 		}	
+		
+// 		// Get ready for the next interrupt
+// 		TMR0L = 255 - 187;	// Reset the timer0 counter
+// 		TMR0IF = 0;		// Clear the timer0 interrupt flag
+// 	}
+// }
+
+
+
 
 void St7789::WriteSpi(const uint8_t* data, size_t size) {
   spi.Write(data, size);
@@ -98,18 +146,19 @@ void St7789::DisplayOn() {
 }
 
 void St7789::SetAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
+
   WriteCommand(static_cast<uint8_t>(Commands::ColumnAddressSet));
   WriteData(x0 >> 8);
   WriteData(x0 & 0xff);
   WriteData(x1 >> 8);
   WriteData(x1 & 0xff);
 
+
   WriteCommand(static_cast<uint8_t>(Commands::RowAddressSet));
   WriteData(y0 >> 8);
   WriteData(y0 & 0xff);
   WriteData(y1 >> 8);
   WriteData(y1 & 0xff);
-
   WriteToRam();
 }
 
@@ -176,6 +225,7 @@ void St7789::Sleep() {
 void St7789::Wakeup() {
   nrf_gpio_cfg_output(pinDataCommand);
   // TODO why do we need to reset the controller?
+
   HardwareReset();
   SoftwareReset();
   SleepOut();
@@ -189,4 +239,6 @@ void St7789::Wakeup() {
   DisplayOn();
   NRF_LOG_INFO("[LCD] Wakeup")
   nrf_gpio_pin_set(2);
+
+  //ControlScreenBrightness();
 }

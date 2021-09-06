@@ -59,6 +59,7 @@ namespace Watch {
         void CheckTracking();
         void CheckHeartbeat();
         void CheckSendLowBattery();
+        void ResetWatch();
         void UpdateTimeOut(uint32_t timeout);
 
         Watch::Controllers::NimbleController& nimble() {return nimbleController;};
@@ -120,6 +121,7 @@ namespace Watch {
         void CheckFallImpact();
         void sendLowbatteryCellphone();
         void UpdateMotion();
+       
         
         bool isFallDiscoveryTimerRunning = false;
         uint8_t FallDiscoveryTimer = 0;
@@ -132,6 +134,7 @@ namespace Watch {
         TimerHandle_t idleTimerTracking;
         TimerHandle_t idleTimerHeartbeat;
         TimerHandle_t idleTimerSendLowBattery;
+        TimerHandle_t idleTimerReset;
 
         bool doNotGoToSleep = false;
         bool sendLowbattery= true;
@@ -163,6 +166,7 @@ namespace Watch {
         uint16_t flagTimerPeak =0;
         uint16_t flagTimerDisFall =0;
         uint8_t flagTimerStageOne=0;
+        uint8_t timerReset=0;
         bool flagcheckStageOne= false;
      
 #if configUSE_TRACE_FACILITY == 1

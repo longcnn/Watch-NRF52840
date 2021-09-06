@@ -96,6 +96,8 @@ namespace Watch {
         float getzmax() { return zmax;};
         void validatorFirmware(bool data);
         bool IsvalidatorFirmware(){ return validator;}
+        uint8_t getmode(){return mode;}
+        void setmode(uint8_t data);
       private:
         static Battery *instance;
         nrf_saadc_value_t  saadc_value;
@@ -117,8 +119,8 @@ namespace Watch {
         bool isTouch = true;
         bool isVibrate = false;
         uint8_t buttonData = 0x02;
-        uint8_t impactzz =0x25;
-        uint8_t impactyy=0x02;
+        uint8_t impactzz=0x35;
+        uint8_t impactyy=0x01;
         uint8_t checkinzz=0x00;
         uint8_t checkinyy=0x00;
         uint8_t fallHighpeak=0x40;
@@ -160,6 +162,7 @@ namespace Watch {
         float xmax =0.0f;
         float ymax=0.0f;
         float zmax=0.0f;
+        uint8_t mode =0;
                
     };
   }

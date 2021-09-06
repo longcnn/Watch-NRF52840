@@ -40,7 +40,6 @@ nimble_port_freertos_init(TaskFunction_t host_task_fn)
     xTaskCreate(nimble_port_ll_task_func, "ll", configMINIMAL_STACK_SIZE + 400,
                 NULL, configMAX_PRIORITIES - 1, &ll_task_h);
 #endif
-
     /*
      * Create task where NimBLE host will run. It is not strictly necessary to
      * have separate task for NimBLE host, but since something needs to handle

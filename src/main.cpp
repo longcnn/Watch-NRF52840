@@ -74,9 +74,7 @@ Watch::Drivers::Spi accSpi {spi, pinSpiAccCsn};
 Watch::Drivers::Kx126 motionSensor {accSpi};
 
 static constexpr uint32_t MaxTwiFrequencyWithoutHardwareBug{0x06200000};
-Watch::Drivers::TwiMaster twiMaster{Watch::Drivers::TwiMaster::Modules::TWIM1,
-                                       Watch::Drivers::TwiMaster::Parameters {
-                                               MaxTwiFrequencyWithoutHardwareBug, pinTwiSda, pinTwiScl}};                                   
+Watch::Drivers::TwiMaster twiMaster {NRF_TWIM1, MaxTwiFrequencyWithoutHardwareBug, pinTwiSda, pinTwiScl};
 Watch::Drivers::Cst816S touchPanel {twiMaster, touchPanelTwiAddress};
 
 Watch::Components::LittleVgl lvgl {lcd, touchPanel};
@@ -89,9 +87,6 @@ Watch::Controllers::DateTime dateTimeController;
 Watch::Controllers::MotionController motionController;
 Watch::Drivers::Watchdog watchdog;
 Watch::Drivers::WatchdogView watchdogView(watchdog);
-
-void ble_manager_set_ble_connection_callback(void (*connection)());
-void ble_manager_set_ble_disconnection_callback(void (*disconnection)());
 
 static constexpr uint8_t pinTouchIrq = 25;
 static constexpr uint8_t pinPowerPresentIrq = 20;
@@ -155,7 +150,6 @@ void Time_IRQHandler(void * p_context){
 void nrfx_gpiote_temp_evt_handler(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t action) {  
 systemTask.ReadTempSensor();
 }
-
 
 extern "C" {
   void vApplicationIdleHook(void) {

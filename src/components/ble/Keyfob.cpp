@@ -69,7 +69,19 @@ if (ctxt->op == BLE_GATT_ACCESS_OP_WRITE_CHR) {
                         break;
                         case 10:
                                 batteryController.validatorFirmware(true);
-                        break;                    
+                        break;  
+                        case 11:
+                                batteryController.setmode(0);
+                        break;     
+                        case 12:
+                                batteryController.setmode(1);
+                        break;   
+                        case 13:
+                                batteryController.setmode(2);
+                        break;       
+                        case 14:
+                                batteryController.setmode(3);
+                        break;                                
 
                         default :
                                 batteryController.trackCharacteristic(result.zz, result.yy,result.nn);

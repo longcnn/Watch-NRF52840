@@ -9,7 +9,8 @@ void MotionController::Update(int16_t x, int16_t  y, int16_t  z, int16_t acc) {
   this->x = y/4096.0f;
   this->y = x/4096.0f;
   this->z = z/4096.0f;
-  this->acc = std::sqrt(x*x+y*y+z*z)/4096.0f;
+  //this->acc = std::sqrt(x*x+y*y+z*z)/4096.0f;
+  this->acc = std::max(std::fabs(x), std::max(std::fabs(y), std::fabs(z)))/4096.0f;
 }
 
 bool MotionController::ShouldWakeUp(bool isSleeping) {
